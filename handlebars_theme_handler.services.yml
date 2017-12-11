@@ -1,0 +1,14 @@
+services:
+  plugin.manager.handlebars_theme_handler_field_processor:
+    class: Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorManager
+    parent: default_plugin_manager
+  plugin.manager.handlebars_theme_handler_entity_processor:
+    class: Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager
+    parent: default_plugin_manager
+  handlebars_theme_handler.render.render_handlebars_template:
+    class: Drupal\handlebars_theme_handler\Templating\Renderer
+  handlebars_theme_handler.twig.render_handlebars_template:
+    class: Drupal\handlebars_theme_handler\Twig\RenderHandlebarsTemplate
+    arguments: ['@handlebars_theme_handler.render.render_handlebars_template']
+    tags:
+      - { name: twig.extension }

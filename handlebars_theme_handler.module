@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * @file
+ * Contains handlebars_theme_handler.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function handlebars_theme_handler_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the handlebars_theme_handler module.
+    case 'help.page.handlebars_theme_handler':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Module for handling handlebars.js templates and rendering') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function handlebars_theme_handler_theme() {
+  /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor_plugin */
+  $entity_processor_plugin = \Drupal::service('plugin.manager.handlebars_theme_handler_entity_processor');
+  $definitions = $entity_processor_plugin->getDefinitions();
+  $theme = [];
+  foreach ($definitions as $key => $definition) {
+    $theme[$key]['preprocess functions'][] = 'template_preprocess_' . $definition['entity_type'];
+    $theme[$key]['preprocess functions'][] = 'handlebars_theme_handler_preprocess_theme_entity';
+  }
+
+  return $theme;
+}
+
+/**
+ * Implements hook_theme_suggestions_alter().
+ */
+function handlebars_theme_handler_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+  /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor_plugin */
+  $entity_processor_plugin_manager = \Drupal::service('plugin.manager.handlebars_theme_handler_entity_processor');
+  if (isset($variables['elements']['#' . $hook]) && $entity_processor_plugin_manager->isFrontTheme()) {
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    if ($entity = $variables['elements']['#' . $hook]) {
+      $definitions = $entity_processor_plugin_manager->getDefinitions();
+      foreach ($definitions as $key => $definition) {
+        if ($hook == $definition['entity_type']
+          && $definition['bundle'] == $entity->bundle()
+          && $variables['elements']['#view_mode'] == $definition['view_mode']) {
+          $suggestions[] = $key;
+        }
+
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function handlebars_theme_handler_theme_registry_alter(&$theme_registry) {
+  /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor_plugin */
+  $entity_processor_plugin = \Drupal::service('plugin.manager.handlebars_theme_handler_entity_processor');
+  $definitions = $entity_processor_plugin->getDefinitions();
+  foreach ($definitions as $key => $definition) {
+    $theme_registry[$key]['new_hook'] = $key;
+  }
+}
+
+/**
+ * Implements handlebars_theme_handler_preprocess_theme_entity().
+ *
+ * Load theme preprocessor manager. Create instance of plugin by new hook name.
+ * Preprocess data by plugin instance.
+ */
+function handlebars_theme_handler_preprocess_theme_entity(&$variables, $hook, $info) {
+  // Get plugin by new hook.
+  if (isset($info['new_hook'])) {
+    /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor_plugin_manager */
+    $entity_processor_plugin_manager = \Drupal::service('plugin.manager.handlebars_theme_handler_entity_processor');
+    $entity_processor_plugin_definition = $entity_processor_plugin_manager->getDefinition($info['new_hook']);
+    if ($entity_processor_plugin_definition && $entity_processor_plugin_definition['id'] == $info['new_hook']) {
+      /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorBase $entity_processor_plugin */
+      $entity_processor_plugin = $entity_processor_plugin_manager->createInstance($info['new_hook']);
+      $entity_processor_plugin->preprocessItemData($variables);
+    }
+  }
+}

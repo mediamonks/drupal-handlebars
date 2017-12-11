@@ -1,0 +1,5 @@
+name: Handlebars theme process
+type: module
+description: Module for handling handlebars.js templates and rendering
+core: 8.x
+package: Custom
