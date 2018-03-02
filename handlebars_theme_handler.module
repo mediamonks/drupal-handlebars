@@ -45,19 +45,14 @@ function handlebars_theme_handler_theme() {
 function handlebars_theme_handler_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
   /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor_plugin */
   $entity_processor_plugin_manager = \Drupal::service('plugin.manager.handlebars_theme_handler_entity_processor');
-  if (isset($variables['elements']['#' . $hook]) && $entity_processor_plugin_manager->isFrontTheme()) {
-    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    if ($entity = $variables['elements']['#' . $hook]) {
-      $definitions = $entity_processor_plugin_manager->getDefinitions();
-      foreach ($definitions as $key => $definition) {
-        if ($hook == $definition['entity_type']
-          && $definition['bundle'] == $entity->bundle()
-          && $variables['elements']['#view_mode'] == $definition['view_mode']) {
-          $suggestions[] = $key;
-        }
-
-      }
+  $definitions = $entity_processor_plugin_manager->getDefinitions();
+  foreach ($definitions as $theme_name => $definition) {
+    if ($hook == $definition['entity_type']
+      && $definition['bundle'] == $variables['elements']['#' . $hook]->bundle()
+        && $variables['elements']['#view_mode'] == $definition['view_mode'] && $entity_processor_plugin_manager->isFrontTheme()) {
+      $suggestions[] = $theme_name;
     }
+
   }
 }
 

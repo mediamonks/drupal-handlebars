@@ -39,20 +39,24 @@ class ThemeFieldProcessorManager extends DefaultPluginManager {
   /**
    * Returns structured field data.
    *
-   * @param \Drupal\Core\Field\FieldItemListInterface $field_list
+   * @param array $field_list
    *
    * @param array $options
    *
    * @return array|string
    * @throws \Exception
    */
-  public function getFieldData(FieldItemListInterface $field_list, $options = array()) {
-    // Load plugin that matches the field
-    $plugin_id = $this->getProcessor($field_list);
-    /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorInterface $processor */
-    $processor = $this->createInstance($plugin_id);
+  public function getFieldData($field_list, $options = []) {
+    $data = [];
+    if (isset($field_list['#items']) && $field_list['#items'] instanceof FieldItemListInterface) {
+      // Load plugin that matches the field
+      $plugin_id = $this->getProcessor($field_list['#items']);
+      /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorInterface $processor */
+      $processor = $this->createInstance($plugin_id);
 
-    $data = $processor->getData($field_list, $options);
+      $data = $processor->getData($field_list['#items'], $options);
+    }
+
     return $data;
   }
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Component\Utility\Xss;
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
+use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_plain_text",
  *   label = @Translation("Plain text"),
  *   field_types = {
@@ -19,7 +19,7 @@ use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
  *   }
  * )
  */
-class FieldPlainText extends RestFieldProcessorBase {
+class FieldPlainText extends ThemeFieldProcessorBase {
 
   /**
    * {@inheritdoc}

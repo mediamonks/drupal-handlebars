@@ -6,6 +6,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\handlebars_theme_handler\Annotation\ThemeEntityProcessor;
 
 /**
  * Provides the Task plugin plugin manager.
@@ -29,8 +30,8 @@ class ThemeEntityProcessorManager extends DefaultPluginManager {
                               CacheBackendInterface $cache_backend,
                               ModuleHandlerInterface $module_handler) {
     parent::__construct('Plugin/ThemeEntityProcessor', $namespaces, $module_handler,
-      'Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorInterface',
-      'Drupal\handlebars_theme_handler\Annotation\ThemeEntityProcessor');
+      ThemeEntityProcessorInterface::class,
+      ThemeEntityProcessor::class);
 
     $this->alterInfo('handlebars_theme_handler_entity_processor_info');
     $this->setCacheBackend($cache_backend, 'handlebars_theme_handler_entity_processor_plugins');
@@ -41,15 +42,89 @@ class ThemeEntityProcessorManager extends DefaultPluginManager {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *
-   * @param string $view_mode
+   * @param array $options
    *
    * @return array|string
    * @throws \Exception
    */
-  public function getEntityData(ContentEntityInterface $entity, $view_mode = 'full') {
+  public function getEntityData(ContentEntityInterface $entity, $options = []) {
+
+    // Load the plugin that matches the entity.
+    $plugin_id = $this->getProcessor($entity, $options);
+    /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorBase $processor */
+    $processor = $this->createInstance($plugin_id);
+
+    $view_mode = isset($options['view_mode']) ? $options['view_mode'] : 'default';
+
     $data = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId())
       ->view($entity, $view_mode);
-    return $data;
+    $preparedData = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId())->build($data);
+
+    $preparedData['elements'] = $preparedData;
+
+    // Get a plugin that matches entity type and bundle.
+    $processor->preprocessItemData($preparedData);
+
+    return $preparedData['data'];
+  }
+
+  /**
+   * Returns the processor ID by entity type and bundle.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *
+   * @param string $version
+   *   API Version.
+   *
+   * @param array $options
+   *
+   * @return string Entity processor plugin ID
+   * Entity processor plugin ID
+   * @throws \Exception When no plugin is available for the entity/bundle.
+   */
+  public function getProcessor(ContentEntityInterface $entity, $options = []) {
+    $processor_plugin = NULL;
+
+    // Get a plugin that matches entity type, bundle and view mode.
+    $map = $this->getProcessorMap();
+    $view_mode = isset($options['view_mode']) ? $options['view_mode'] : 'default';
+    $key = implode('.', [
+      $entity->getEntityTypeId(),
+      $entity->bundle(),
+      $view_mode,
+    ]);
+    $processor_id = isset($map[$key]) ? $map[$key] : NULL;
+    // @todo Nice: version fallback.
+
+    if (empty($processor_id)) {
+      throw new \Exception(sprintf("No EntityProcessor plugin found for entity of type '%s', bundle '%s' and view mode '%s'", $entity->getEntityTypeId(), $entity->bundle(), $view_mode));
+    }
+
+    return $processor_id;
+  }
+
+  /**
+   * Loads a map of all plugin IDs keyed by entity type and bundle.
+   *
+   * @return array
+   *   Plugin ID map keyed by {$enity_type}.{$bundle}.{view mode}.{version}.
+   */
+  protected function getProcessorMap() {
+
+    if (!isset($this->plugin_map)) {
+      /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorInterface[] $plugins */
+      $plugins = $this->getDefinitions();
+      foreach ($plugins as $plugin_id => $plugin) {
+        $key = implode('.', [
+          $plugin['entity_type'],
+          $plugin['bundle'],
+          isset($plugin['view_mode']) ? $plugin['view_mode'] : 'default'
+        ]);
+        $this->plugin_map[$key] = $plugin_id;
+      }
+    }
+
+    return $this->plugin_map;
   }
 
   /**

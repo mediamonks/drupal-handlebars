@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_boolean",
  *   label = @Translation("Boolean"),
  *   field_types = {

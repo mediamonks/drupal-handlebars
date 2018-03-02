@@ -1,15 +1,14 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_entity_reference",
  *   label = @Translation("Entity reference"),
  *   field_types = {
@@ -23,11 +22,11 @@ class FieldEntityReference extends ThemeFieldProcessorBase {
   /**
    * {@inheritdoc}
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData($field, $options = []) {
 
     /** @var ContentEntityInterface $entity */
     $entity = $field->get('entity')->getValue();
-    $data = $this->themeEntityProcessorManager->getEntityData($entity);
+    $data = $this->themeEntityProcessorManager->getEntityData($entity, $options);
     return $data;
 
   }
