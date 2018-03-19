@@ -1,14 +1,15 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
+use Drupal\Core\Field\FieldItemInterface;
+use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_link",
  *   label = @Translation("Link"),
  *   field_types = {
@@ -16,14 +17,14 @@ use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
  *   }
  * )
  */
-class FieldLink extends RestFieldProcessorBase {
+class FieldLink extends ThemeFieldProcessorBase {
 
   /**
    * {@inheritdoc}
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = array()) {
     $data = [
-      'caption' => $field->title,
+      'text' => $field->title,
       'url' => UrlHelper::stripDangerousProtocols($field->uri)
     ];
     return $data;

@@ -1,13 +1,14 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
+use Drupal\Core\Field\FieldItemInterface;
+use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_float",
  *   label = @Translation("Float"),
  *   field_types = {
@@ -15,12 +16,12 @@ use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
  *   }
  * )
  */
-class FieldFloat extends RestFieldProcessorBase {
+class FieldFloat extends ThemeFieldProcessorBase {
 
   /**
    * {@inheritdoc}
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = array()) {
     $data = $field->getValue();
     return $data['value'];
   }

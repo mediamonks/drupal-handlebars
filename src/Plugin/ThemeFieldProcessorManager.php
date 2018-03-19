@@ -47,7 +47,7 @@ class ThemeFieldProcessorManager extends DefaultPluginManager {
    * @throws \Exception
    */
   public function getFieldData($field_list, $options = []) {
-    $data = [];
+    $data = NULL;
     if (isset($field_list['#items']) && $field_list['#items'] instanceof FieldItemListInterface) {
       // Load plugin that matches the field
       $plugin_id = $this->getProcessor($field_list['#items']);

@@ -1,19 +1,19 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\image\Entity\ImageStyle;
-use Drupal\mm_rest\CacheableMetaDataCollectorInterface;
-use Drupal\mm_rest\Plugin\RestEntityProcessorManager;
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
+use Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager;
+use Drupal\Core\Field\FieldItemInterface;
+use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_image",
  *   label = @Translation("Image"),
  *   field_types = {
@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   }
  * )
  */
-class FieldImage extends RestFieldProcessorBase {
+class FieldImage extends ThemeFieldProcessorBase {
 
   /**
    * Drupal\Core\Entity\EntityTypeManager definition.
@@ -34,15 +34,13 @@ class FieldImage extends RestFieldProcessorBase {
    * @param array $configuration
    * @param string $plugin_id
    * @param mixed $plugin_definition
-   * @param \Drupal\mm_rest\Plugin\RestEntityProcessorManager $entity_processor
-   * @param \Drupal\mm_rest\CacheableMetaDataCollectorInterface $cacheable_metadata_collector
+   * @param \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RestEntityProcessorManager $entity_processor, CacheableMetaDataCollectorInterface $cacheable_metadata_collector, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor, $cacheable_metadata_collector);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor);
 
     $this->entityProcessor = $entity_processor;
-    $this->cacheabilityCollector = $cacheable_metadata_collector;
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -54,8 +52,7 @@ class FieldImage extends RestFieldProcessorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.mm_rest_entity_processor'),
-      $container->get('mm_rest.cacheable_metadata_collector'),
+      $container->get('plugin.manager.handlebars_theme_handler_entity_processor'),
       $container->get('entity_type.manager')
     );
   }
@@ -63,18 +60,15 @@ class FieldImage extends RestFieldProcessorBase {
   /**
    * {@inheritdoc}
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = array()) {
 
     $file_entity = $field->entity;
     if (isset($options['style'])) {
-      $style_config = $this->entityTypeManager->getStorage('image_style')->load($options['style']);
-      $this->cacheabilityCollector->addCacheableDependency($style_config);
       $url = $this->getStyledImageUrl($field, $options['style']);
     }
     else {
       $url = file_create_url($file_entity->uri->value);
     }
-    $this->cacheabilityCollector->addCacheableDependency($file_entity);
 
     $data = [
       'url' => $url,
@@ -96,7 +90,7 @@ class FieldImage extends RestFieldProcessorBase {
    *   The URL of the styled image. Or the URL of the original image if the
    *   style is unknown. This will generate the requested styled image.
    */
-  protected function getStyledImageUrl($field, $style) {
+  protected function getStyledImageUrl(FieldItemInterface $field, $style) {
     $original_url = $field->get('entity')->uri->value;
 
     $style = ImageStyle::load($style);

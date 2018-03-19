@@ -1,13 +1,14 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
+use Drupal\Core\Field\FieldItemInterface;
+use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_file",
  *   label = @Translation("File"),
  *   field_types = {
@@ -15,12 +16,12 @@ use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
  *   }
  * )
  */
-class FieldFile extends RestFieldProcessorBase {
+class FieldFile extends ThemeFieldProcessorBase {
 
   /**
    * {@inheritdoc}
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = array()) {
     $data = [
       'type' => 'file',
       'url' => file_create_url($field->entity->uri->value),

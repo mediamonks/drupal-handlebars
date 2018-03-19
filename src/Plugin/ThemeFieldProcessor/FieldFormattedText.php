@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
+use Drupal\Core\Field\FieldItemInterface;
 use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 
 /**
@@ -22,7 +23,7 @@ class FieldFormattedText extends ThemeFieldProcessorBase {
   /**
    * {@inheritdoc}
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = array()) {
     return check_markup($field->value, $field->format);
   }
 

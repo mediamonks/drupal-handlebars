@@ -1,18 +1,17 @@
 <?php
 
-namespace Drupal\mm_rest\Plugin\RestFieldProcessor;
+namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
-use Drupal\mm_rest\CacheableMetaDataCollectorInterface;
-use Drupal\mm_rest\Plugin\RestFieldProcessorBase;
-use Drupal\mm_rest\Plugin\RestEntityProcessorManager;
+use Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager;
+use Drupal\Core\Field\FieldItemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns the (structured) data of a field.
  *
- * @RestFieldProcessor(
+ * @ThemeFieldProcessor(
  *   id = "field_datetime",
  *   label = @Translation("Date time"),
  *   field_types = {
@@ -33,12 +32,11 @@ class FieldDateTime extends ThemeFieldProcessorBase {
    * @param array $configuration
    * @param string $plugin_id
    * @param mixed $plugin_definition
-   * @param \Drupal\mm_rest\Plugin\RestEntityProcessorManager $entity_processor
-   * @param \Drupal\mm_rest\CacheableMetaDataCollectorInterface $cacheable_metadata_collector
+   * @param \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RestEntityProcessorManager $entity_processor, CacheableMetaDataCollectorInterface $cacheable_metadata_collector, DateFormatterInterface $date_formatter) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor, $cacheable_metadata_collector);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, DateFormatterInterface $date_formatter) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor);
     $this->dateFormatter = $date_formatter;
   }
 
@@ -50,8 +48,7 @@ class FieldDateTime extends ThemeFieldProcessorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.mm_rest_entity_processor'),
-      $container->get('mm_rest.cacheable_metadata_collector'),
+      $container->get('plugin.manager.handlebars_theme_handler_entity_processor'),
       $container->get('date.formatter')
     );
   }
@@ -66,7 +63,7 @@ class FieldDateTime extends ThemeFieldProcessorBase {
    * @return string
    *   Date formatted.
    */
-  protected function getItemData($field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = array()) {
     $options += [
       'type' => 'medium',
       'format' => '',

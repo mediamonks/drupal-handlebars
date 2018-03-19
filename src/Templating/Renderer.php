@@ -2,7 +2,6 @@
 
 namespace Drupal\handlebars_theme_handler\Templating;
 
-use Drupal\Core\DrupalKernelInterface;
 use Handlebars\Cache;
 use Handlebars\Handlebars;
 use Handlebars\Helper;
@@ -24,7 +23,7 @@ class Renderer {
   /**
    * @var Handlebars
    */
-  private $handlebarsRenderingEngine;
+  protected $handlebarsRenderingEngine;
 
   /**
    * Constructor

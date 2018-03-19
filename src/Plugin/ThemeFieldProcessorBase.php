@@ -8,6 +8,7 @@
 
 namespace Drupal\handlebars_theme_handler\Plugin;
 
+use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,6 +51,10 @@ abstract class ThemeFieldProcessorBase extends PluginBase implements ThemeFieldP
    */
   public function getData($fields, $options = []) {
     $single = FALSE;
+    $multiple = FALSE;
+    if (isset($options['multiple']) && $options['multiple']) {
+      $multiple = TRUE;
+    }
     $count = $fields->count();
     $data = [];
 
@@ -74,7 +79,7 @@ abstract class ThemeFieldProcessorBase extends PluginBase implements ThemeFieldP
       }
     }
 
-    return $single ? reset($data) : $data;
+    return $single && !$multiple ? reset($data) : $data;
   }
 
   /**
@@ -86,6 +91,6 @@ abstract class ThemeFieldProcessorBase extends PluginBase implements ThemeFieldP
    * @return string|array
    *   Field data.
    */
-  abstract protected function getItemData($field, $options = array());
+  abstract protected function getItemData(FieldItemInterface $field, $options = array());
 
 }
