@@ -87,6 +87,7 @@ abstract class ThemeEntityProcessorBase extends PluginBase implements ThemeEntit
    * Returns structured data of a single field.
    *
    * @param array $variables
+   * @throws \Exception
    */
   abstract public function preprocessItemData(&$variables);
 

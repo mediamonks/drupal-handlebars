@@ -53,7 +53,9 @@ class ThemeFieldProcessorManager extends DefaultPluginManager {
       $plugin_id = $this->getProcessor($field_list['#items']);
       /** @var \Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorInterface $processor */
       $processor = $this->createInstance($plugin_id);
-
+      if (isset($field_list[0]['#image_style']) && !isset($options['style'])) {
+        $options['style'] = $field_list[0]['#image_style'];
+      }
       $data = $processor->getData($field_list['#items'], $options);
     }
 

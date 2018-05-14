@@ -62,12 +62,11 @@ class FieldImage extends ThemeFieldProcessorBase {
    */
   protected function getItemData(FieldItemInterface $field, $options = array()) {
 
-    $file_entity = $field->entity;
     if (isset($options['style'])) {
       $url = $this->getStyledImageUrl($field, $options['style']);
     }
     else {
-      $url = file_create_url($file_entity->uri->value);
+      $url = file_create_url($field->entity->uri->value);
     }
 
     $data = [
@@ -91,7 +90,7 @@ class FieldImage extends ThemeFieldProcessorBase {
    *   style is unknown. This will generate the requested styled image.
    */
   protected function getStyledImageUrl(FieldItemInterface $field, $style) {
-    $original_url = $field->get('entity')->uri->value;
+    $original_url = $field->entity->uri->value;
 
     $style = ImageStyle::load($style);
     if ($style) {
