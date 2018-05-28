@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Command;
 
+use Drupal\paragraphs\Entity\ParagraphsType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,6 +58,8 @@ class GenerateParagraphsCommand extends Command {
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
     $io = new DrupalStyle($input, $output);
@@ -91,11 +94,16 @@ class GenerateParagraphsCommand extends Command {
           $componentClassName = 'ParagraphsBlock' . $this->dashesToCamelCase($componentTemplateName, TRUE);
           $componentClassPath = $moduleComponentsPath . '/' . $componentClassName . '.php';
           if ($this->filesystem->exists($classTemplate)) {
+            // Copy file.
             $this->filesystem->copy($classTemplate, $componentClassPath);
+
+            // Add module name in namespace, paragraph ID, label.
             $this->replaceTextInFile($componentClassPath, 'module_name', $module);
             $this->replaceTextInFile($componentClassPath, 'ParagraphBlockTemplate', $componentClassName);
-            $this->replaceTextInFile($componentClassPath, 'paragraph_machine_name', str_replace('-', '_', $componentTemplateName));
-            $this->replaceTextInFile($componentClassPath, 'paragraph_human_name', $this->dashesToCamelCase($componentTemplateName, TRUE, TRUE));
+            $id = str_replace('-', '_', $componentTemplateName);
+            $this->replaceTextInFile($componentClassPath, 'paragraph_machine_name', $id);
+            $label = $this->dashesToCamelCase($componentTemplateName, TRUE, TRUE);
+            $this->replaceTextInFile($componentClassPath, 'paragraph_human_name', $label);
 
             // Get data from data.json file.
             $jsonData = file_get_contents($templateDirectory . '/data.json');
@@ -106,6 +114,17 @@ class GenerateParagraphsCommand extends Command {
             $arrayString = '$variables[\'data\'] = ' . $arrayString . ';';
             $this->replaceTextInFile($componentClassPath, '// Static code goes here', $arrayString);
 
+            // Create Paragraph types.
+            $paragraph_type = ParagraphsType::load($id);
+            if (!$paragraph_type instanceof ParagraphsType) {
+              $paragraph_type = ParagraphsType::create([
+                'id' => $id,
+                'label' => $label,
+              ]);
+              $paragraph_type->save();
+            }
+
+            // Display successful message.
             $io->successLite(t('Component @component has been created', [
               '@component' => $componentClassName,
             ]));
