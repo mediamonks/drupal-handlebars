@@ -1,0 +1,5 @@
+description: 'Drupal Console command for creating paragraphs classes from handlebars templates.'
+options: {}
+arguments: {}
+messages:
+    success: 'Paragraphs classes are created successfully!!!'

@@ -1,0 +1,7 @@
+services:
+  handlebars_theme_handler.handlebars_theme_handler_generate_paragraphs:
+    class: Drupal\handlebars_theme_handler\Command\GenerateParagraphsCommand
+    arguments: []
+    tags:
+      - { name: drupal.command }
+
