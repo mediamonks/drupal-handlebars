@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Command;
 
+use Drupal\handlebars_theme_handler\FilesUtility;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -34,13 +35,22 @@ class GenerateParagraphsCommand extends Command {
   protected $filesystem;
 
   /**
-   * Constructor
+   * @var \Drupal\handlebars_theme_handler\FilesUtility
+   */
+  private $filesUtility;
+
+  /**
+   * Constructor.
+   *
+   * @param \Drupal\handlebars_theme_handler\FilesUtility $filesUtility
+   *   Handlebars rendering engine
    *
    * @throws \InvalidArgumentException If no template directories got defined.
    */
-  public function __construct() {
+  public function __construct(FilesUtility $filesUtility) {
     $this->fileLocator = new FileLocator(DRUPAL_ROOT);
     $this->filesystem = new Filesystem();
+    $this->filesUtility = $filesUtility;
     parent::__construct();
   }
 
@@ -77,7 +87,7 @@ class GenerateParagraphsCommand extends Command {
       return;
     }
     $templateDirectories = [$templatePath];
-    $templateDirectories = $this->getTemplateDirectoriesRecursive($templateDirectories);
+    $templateDirectories = $this->filesUtility->getTemplateDirectoriesRecursive($templateDirectories);
 
     $classTemplate = __DIR__ . '/../ThemeEntityProcessorTemplate/ParagraphBlockTemplate.php';
     $moduleComponentsPath = drupal_get_path('module', $module) . '/src/Plugin/ThemeEntityProcessor/ParagraphsBlock';
@@ -91,19 +101,19 @@ class GenerateParagraphsCommand extends Command {
           $componentTemplateName = end($templatePathArray);
 
           // Generate Class name.
-          $componentClassName = 'ParagraphsBlock' . $this->dashesToCamelCase($componentTemplateName, TRUE);
+          $componentClassName = 'ParagraphsBlock' . $this->filesUtility->dashesToCamelCase($componentTemplateName, TRUE);
           $componentClassPath = $moduleComponentsPath . '/' . $componentClassName . '.php';
           if ($this->filesystem->exists($classTemplate)) {
             // Copy file.
             $this->filesystem->copy($classTemplate, $componentClassPath);
 
             // Add module name in namespace, paragraph ID, label.
-            $this->replaceTextInFile($componentClassPath, 'module_name', $module);
-            $this->replaceTextInFile($componentClassPath, 'ParagraphBlockTemplate', $componentClassName);
+            $this->filesUtility->replaceTextInFile($componentClassPath, 'module_name', $module);
+            $this->filesUtility->replaceTextInFile($componentClassPath, 'ParagraphBlockTemplate', $componentClassName);
             $id = str_replace('-', '_', $componentTemplateName);
-            $this->replaceTextInFile($componentClassPath, 'paragraph_machine_name', $id);
-            $label = $this->dashesToCamelCase($componentTemplateName, TRUE, TRUE);
-            $this->replaceTextInFile($componentClassPath, 'paragraph_human_name', $label);
+            $this->filesUtility->replaceTextInFile($componentClassPath, 'paragraph_machine_name', $id);
+            $label = $this->filesUtility->dashesToCamelCase($componentTemplateName, TRUE, TRUE);
+            $this->filesUtility->replaceTextInFile($componentClassPath, 'paragraph_human_name', $label);
 
             // Get data from data.json file.
             $jsonData = file_get_contents($templateDirectory . '/data.json');
@@ -112,7 +122,7 @@ class GenerateParagraphsCommand extends Command {
             // Replace static text with array from JSON.
             $arrayString = preg_replace('#,(\s+|)\)#', '$1)', var_export($arrayData, true));
             $arrayString = '$variables[\'data\'] = ' . $arrayString . ';';
-            $this->replaceTextInFile($componentClassPath, '// Static code goes here', $arrayString);
+            $this->filesUtility->replaceTextInFile($componentClassPath, '// Static code goes here', $arrayString);
 
             // Create Paragraph types.
             $paragraph_type = ParagraphsType::load($id);
@@ -132,78 +142,6 @@ class GenerateParagraphsCommand extends Command {
         }
       }
     }
-
-  }
-
-  /**
-   * Returns all directories including their sub directories for the given
-   * template resources
-   *
-   * @param array $templateDirectories List of directories containing
-   *   handlebars templates
-   *
-   * @return array
-   */
-  private function getTemplateDirectoriesRecursive(array $templateDirectories) {
-    $templateDirectoriesWithSubDirectories = [];
-    $templateDirectories = $this->getTemplateDirectories($templateDirectories);
-
-    $finder = new Finder();
-
-    /** @var \Symfony\Component\Finder\SplFileInfo $subDirectory */
-    foreach ($finder->directories()
-               ->in($templateDirectories) as $subDirectory) {
-      $templateDirectoriesWithSubDirectories[] = $subDirectory->getRealPath();
-    }
-
-    return array_unique(array_merge($templateDirectories, $templateDirectoriesWithSubDirectories));
-  }
-
-  /**
-   * Returns all directories for the given template resources
-   *
-   * @param array $templateDirectories List of directories containing
-   *   handlebars templates
-   *
-   * @return array
-   */
-  private function getTemplateDirectories(array $templateDirectories) {
-    return array_map(
-      function ($templateDirectory) {
-        return rtrim($this->fileLocator->locate($templateDirectory), '/');
-      },
-      $templateDirectories
-    );
-  }
-
-  /**
-   * @param $string
-   * @param bool $capitalizeFirstCharacter
-   * @param bool $spaceBetweenWords
-   *
-   * @return mixed|string
-   */
-  private function dashesToCamelCase($string, $capitalizeFirstCharacter = FALSE, $spaceBetweenWords = FALSE) {
-    $str = str_replace('-', ' ', ucwords($string, '-'));
-    if (!$spaceBetweenWords) {
-      $str = str_replace(' ', '', $str);
-    }
-    if (!$capitalizeFirstCharacter) {
-      $str = lcfirst($str);
-    }
-
-    return $str;
-  }
-
-  /**
-   * @param string $filePath
-   * @param string $oldText
-   * @param string $newText
-   */
-  private function replaceTextInFile($filePath, $oldText, $newText) {
-    $componentClassContent = file_get_contents($filePath);
-    $FileContent = str_replace($oldText, $newText, $componentClassContent);
-    file_put_contents($filePath, $FileContent);
   }
 
 }

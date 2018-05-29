@@ -5,8 +5,11 @@ services:
   plugin.manager.handlebars_theme_handler_entity_processor:
     class: Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager
     parent: default_plugin_manager
+  handlebars_theme_handler.files_utility:
+    class: Drupal\handlebars_theme_handler\FilesUtility
   handlebars_theme_handler.render.render_handlebars_template:
     class: Drupal\handlebars_theme_handler\Templating\Renderer
+    arguments: ['@handlebars_theme_handler.files_utility']
   handlebars_theme_handler.twig.render_handlebars_template:
     class: Drupal\handlebars_theme_handler\Twig\RenderHandlebarsTemplate
     arguments: ['@handlebars_theme_handler.render.render_handlebars_template']

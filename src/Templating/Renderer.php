@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Templating;
 
+use Drupal\handlebars_theme_handler\FilesUtility;
 use Handlebars\Cache;
 use Handlebars\Handlebars;
 use Handlebars\Helper;
@@ -26,18 +27,27 @@ class Renderer {
   protected $handlebarsRenderingEngine;
 
   /**
-   * Constructor
+   * @var \Drupal\handlebars_theme_handler\FilesUtility
+   */
+  private $filesUtility;
+
+  /**
+   * Constructor.
+   *
+   * @param \Drupal\handlebars_theme_handler\FilesUtility $filesUtility
+   *   Handlebars rendering engine
    *
    * @throws \InvalidArgumentException If no template directories got defined.
    */
-  public function __construct() {
+  public function __construct(FilesUtility $filesUtility) {
+    $this->filesUtility = $filesUtility;
     $this->fileLocator = new FileLocator(DRUPAL_ROOT);
 
     $defaultTheme = \Drupal::config('system.theme')->get('default');
     $templatePath = drupal_get_path('theme', $defaultTheme) . '/templates/';
     $templateDirectories = [$templatePath];
 
-    $templateDirectories = $this->getTemplateDirectoriesRecursive($templateDirectories);
+    $templateDirectories = $this->filesUtility->getTemplateDirectoriesRecursive($templateDirectories);
     if (empty($templateDirectories)) {
       throw new \InvalidArgumentException('No Handlebars template directories got defined in "smartive_handlebars.templating.template_directories".');
     }
@@ -66,47 +76,6 @@ class Renderer {
    */
   public function render($template, array $data = []) {
     return $this->handlebarsRenderingEngine->render($template, $data);
-  }
-
-  /**
-   * Returns all directories including their sub directories for the given
-   * template resources
-   *
-   * @param array $templateDirectories List of directories containing
-   *   handlebars templates
-   *
-   * @return array
-   */
-  private function getTemplateDirectoriesRecursive(array $templateDirectories) {
-    $templateDirectoriesWithSubDirectories = [];
-    $templateDirectories = $this->getTemplateDirectories($templateDirectories);
-
-    $finder = new Finder();
-
-    /** @var SplFileInfo $subDirectory */
-    foreach ($finder->directories()
-               ->in($templateDirectories) as $subDirectory) {
-      $templateDirectoriesWithSubDirectories[] = $subDirectory->getRealPath();
-    }
-
-    return array_unique(array_merge($templateDirectories, $templateDirectoriesWithSubDirectories));
-  }
-
-  /**
-   * Returns all directories for the given template resources
-   *
-   * @param array $templateDirectories List of directories containing
-   *   handlebars templates
-   *
-   * @return array
-   */
-  private function getTemplateDirectories(array $templateDirectories) {
-    return array_map(
-      function ($templateDirectory) {
-        return rtrim($this->fileLocator->locate($templateDirectory), '/');
-      },
-      $templateDirectories
-    );
   }
 
   /**

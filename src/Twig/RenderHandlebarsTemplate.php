@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Twig;
 
+use Drupal\handlebars_theme_handler\FilesUtility;
 use Handlebars\Handlebars;
 use Handlebars\Loader\FilesystemLoader;
 use Drupal\handlebars_theme_handler\Templating\Renderer;
