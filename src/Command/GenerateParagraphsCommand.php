@@ -13,6 +13,7 @@ use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Annotations\DrupalCommand;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class GenerateParagraphsCommand.
@@ -115,29 +116,30 @@ class GenerateParagraphsCommand extends Command {
             $label = $this->filesUtility->dashesToCamelCase($componentTemplateName, TRUE, TRUE);
             $this->filesUtility->replaceTextInFile($componentClassPath, 'paragraph_human_name', $label);
 
-            // Get data from data.json file.
-            $jsonData = file_get_contents($templateDirectory . '/data.json');
-            $arrayData = json_decode($jsonData, TRUE);
+            // Get data from data.yaml file.
+            if (file_exists($templateDirectory . '/data.yaml')) {
+              $arrayData = Yaml::parseFile($templateDirectory . '/data.yaml');
 
-            // Replace static text with array from JSON.
-            $arrayString = preg_replace('#,(\s+|)\)#', '$1)', var_export($arrayData, true));
-            $arrayString = '$variables[\'data\'] = ' . $arrayString . ';';
-            $this->filesUtility->replaceTextInFile($componentClassPath, '// Static code goes here', $arrayString);
+              // Replace static text with array from JSON.
+              $arrayString = preg_replace('#,(\s+|)\)#', '$1)', var_export($arrayData, true));
+              $arrayString = '$variables[\'data\'] = ' . $arrayString . ';';
+              $this->filesUtility->replaceTextInFile($componentClassPath, '// Static code goes here', $arrayString);
 
-            // Create Paragraph types.
-            $paragraph_type = ParagraphsType::load($id);
-            if (!$paragraph_type instanceof ParagraphsType) {
-              $paragraph_type = ParagraphsType::create([
-                'id' => $id,
-                'label' => $label,
-              ]);
-              $paragraph_type->save();
+              // Create Paragraph types.
+              $paragraph_type = ParagraphsType::load($id);
+              if (!$paragraph_type instanceof ParagraphsType) {
+                $paragraph_type = ParagraphsType::create([
+                  'id' => $id,
+                  'label' => $label,
+                ]);
+                $paragraph_type->save();
+              }
+
+              // Display successful message.
+              $io->successLite(t('Component @component has been created', [
+                '@component' => $componentClassName,
+              ]));
             }
-
-            // Display successful message.
-            $io->successLite(t('Component @component has been created', [
-              '@component' => $componentClassName,
-            ]));
           }
         }
       }
