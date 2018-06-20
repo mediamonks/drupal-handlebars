@@ -7,6 +7,7 @@
   "homepage": "https://www.drupal.org/project/handlebars_theme_handler",
   "minimum-stability": "dev",
   "require": {
-    "xamin/handlebars.php": "^0.10.4"
+    "xamin/handlebars.php": "^0.10.4",
+    "zordius/lightncandy": "^1.2"
   }
 }

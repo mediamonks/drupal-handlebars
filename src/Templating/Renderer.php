@@ -7,9 +7,11 @@ use Handlebars\Cache;
 use Handlebars\Handlebars;
 use Handlebars\Helper;
 use Handlebars\Loader\FilesystemLoader;
+use LightnCandy\Runtime;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Config\FileLocator;
+use LightnCandy\LightnCandy;
 
 /**
  * Service to render handlebars templates
@@ -25,6 +27,11 @@ class Renderer {
    * @var Handlebars
    */
   protected $handlebarsRenderingEngine;
+
+  /**
+   * @var \Drupal\handlebars_theme_handler\Templating\Loader
+   */
+  protected $newLoader;
 
   /**
    * @var \Drupal\handlebars_theme_handler\FilesUtility
@@ -52,12 +59,17 @@ class Renderer {
       throw new \InvalidArgumentException('No Handlebars template directories got defined in "smartive_handlebars.templating.template_directories".');
     }
 
-    $loader = new FilesystemLoader(
-      $templateDirectories,
+    $loader = new FilesystemLoader($templateDirectories,
       [
         'extension' => '.hbs',
       ]
     );
+
+    $this->newLoader = new Loader($templateDirectories,
+      [
+        'extension' => '.hbs',
+      ]);
+
     $this->handlebarsRenderingEngine = new Handlebars(
       [
         'loader' => $loader,
@@ -75,7 +87,22 @@ class Renderer {
    * @return string
    */
   public function render($template, array $data = []) {
-    return $this->handlebarsRenderingEngine->render($template, $data);
+    $hbTemplateData = $this->newLoader->loadFile($template);
+
+    $php = LightnCandy::compile($hbTemplateData, [
+      'flags' => LightnCandy::FLAG_HANDLEBARSJS | LightnCandy::FLAG_RUNTIMEPARTIAL,
+      'partialresolver' => function ($cx, $name) {
+        if ($hbTemplateData = $this->newLoader->loadFile($name . '.hbs')) {
+          return $hbTemplateData;
+        }
+        return "[partial (file:$name.tmpl) not found]";
+      }
+    ]);
+    $render = LightnCandy::prepare($php);
+
+    $results = $render($data, ['debug' => Runtime::DEBUG_ERROR_LOG]);
+
+    return $results;
   }
 
   /**
