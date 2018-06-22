@@ -5,7 +5,7 @@ namespace Drupal\handlebars_theme_handler\Twig;
 use Drupal\handlebars_theme_handler\FilesUtility;
 use Handlebars\Handlebars;
 use Handlebars\Loader\FilesystemLoader;
-use Drupal\handlebars_theme_handler\Templating\Renderer;
+use Drupal\handlebars_theme_handler\Handlebars\Renderer;
 
 /**
  * Class RenderHandlebarsTemplate.
@@ -15,14 +15,14 @@ use Drupal\handlebars_theme_handler\Templating\Renderer;
 class RenderHandlebarsTemplate extends \Twig_Extension {
 
   /**
-   * @var \Drupal\handlebars_theme_handler\Templating\Renderer
+   * @var \Drupal\handlebars_theme_handler\Handlebars\Renderer
    */
   private $handlebarsRenderer;
 
   /**
    * Constructor
    *
-   * @param \Drupal\handlebars_theme_handler\Templating\Renderer $handlebarsRenderer
+   * @param \Drupal\handlebars_theme_handler\Handlebars\Renderer $handlebarsRenderer
    *   Handlebars rendering engine
    */
   public function __construct(Renderer $handlebarsRenderer) {

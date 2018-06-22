@@ -2,7 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler;
 
-use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -27,9 +27,9 @@ class FilesUtility {
    *
    * @throws \InvalidArgumentException If no template directories got defined.
    */
-  public function __construct() {
-    $this->fileLocator = new FileLocator(DRUPAL_ROOT);
-    $this->finder = new Finder();
+  public function __construct(FileLocatorInterface $fileLocator, Finder $finder) {
+    $this->fileLocator = $fileLocator;
+    $this->finder = $finder;
   }
 
   /**
@@ -46,12 +46,16 @@ class FilesUtility {
     $templateDirectories = $this->getTemplateDirectories($templateDirectories);
 
     /** @var \Symfony\Component\Finder\SplFileInfo $subDirectory */
-    foreach ($this->finder->directories()
-               ->in($templateDirectories) as $subDirectory) {
+    foreach ($this->finder->directories()->in($templateDirectories) as $subDirectory) {
       $templateDirectoriesWithSubDirectories[] = $subDirectory->getRealPath();
     }
 
-    return array_unique(array_merge($templateDirectories, $templateDirectoriesWithSubDirectories));
+    $allTemplateDirectories = array_unique(array_merge($templateDirectories, $templateDirectoriesWithSubDirectories));
+    if (empty($allTemplateDirectories)) {
+      throw new \InvalidArgumentException('No Handlebars template directories got defined in template directories.');
+    }
+
+    return $allTemplateDirectories;
   }
 
   /**

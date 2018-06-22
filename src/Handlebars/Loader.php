@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\handlebars_theme_handler\Templating;
+namespace Drupal\handlebars_theme_handler\Handlebars;
 
 /**
  * Class Loader
@@ -10,9 +10,12 @@ namespace Drupal\handlebars_theme_handler\Templating;
 class Loader {
 
   protected $baseDir;
+
   private $_extension = '.hbs';
+
   private $_prefix = '';
-  private $_templates = array();
+
+  private $_templates = [];
 
   /**
    * Loader constructor.
@@ -99,6 +102,15 @@ class Loader {
     }
 
     return file_get_contents($fileName);
+  }
+
+  /**
+   * @param $name
+   *
+   * @return string
+   */
+  public function getCacheKey($name) {
+    return $this->getFileName($name);
   }
 
   /**

@@ -5,11 +5,28 @@ services:
   plugin.manager.handlebars_theme_handler_entity_processor:
     class: Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager
     parent: default_plugin_manager
+  handlebars_theme_handler.file_locator:
+    class: Symfony\Component\Config\FileLocator
+    arguments: ['@app.root']
+  handlebars_theme_handler.finder:
+    class: Symfony\Component\Finder\Finder
   handlebars_theme_handler.files_utility:
     class: Drupal\handlebars_theme_handler\FilesUtility
+    arguments: ['@handlebars_theme_handler.file_locator', '@handlebars_theme_handler.finder']
+  handlebars.helper:
+    class: Drupal\handlebars_theme_handler\HandlebarsHelperService
+  handlebars.helper.json:
+    class: Drupal\handlebars_theme_handler\Helper\JsonHelper
+    tags:
+      - { name: handlebars.helper }
+  handlebars_theme_handler.handlebars_engine:
+    class: Drupal\handlebars_theme_handler\HandlebarsEngine
+    arguments:
+      - '@handlebars_theme_handler.files_utility'
+      - '@handlebars.helper'
   handlebars_theme_handler.render.render_handlebars_template:
-    class: Drupal\handlebars_theme_handler\Templating\Renderer
-    arguments: ['@handlebars_theme_handler.files_utility']
+    class: Drupal\handlebars_theme_handler\Handlebars\Renderer
+    arguments: ['@handlebars_theme_handler.files_utility', '@handlebars.helper']
   handlebars_theme_handler.twig.render_handlebars_template:
     class: Drupal\handlebars_theme_handler\Twig\RenderHandlebarsTemplate
     arguments: ['@handlebars_theme_handler.render.render_handlebars_template']

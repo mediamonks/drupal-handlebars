@@ -1,16 +1,14 @@
 <?php
 
-namespace Drupal\handlebars_theme_handler\Templating;
+namespace Drupal\handlebars_theme_handler\Handlebars;
 
 use Drupal\handlebars_theme_handler\FilesUtility;
+use Drupal\handlebars_theme_handler\HandlebarsHelperServiceInterface;
 use Handlebars\Cache;
 use Handlebars\Handlebars;
 use Handlebars\Helper;
 use Handlebars\Loader\FilesystemLoader;
 use LightnCandy\Runtime;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Config\FileLocator;
 use LightnCandy\LightnCandy;
 
 /**
@@ -19,17 +17,12 @@ use LightnCandy\LightnCandy;
 class Renderer {
 
   /**
-   * @var FileLocator
-   */
-  private $fileLocator;
-
-  /**
    * @var Handlebars
    */
   protected $handlebarsRenderingEngine;
 
   /**
-   * @var \Drupal\handlebars_theme_handler\Templating\Loader
+   * @var \Drupal\handlebars_theme_handler\Handlebars\Loader
    */
   protected $newLoader;
 
@@ -39,6 +32,11 @@ class Renderer {
   private $filesUtility;
 
   /**
+   * @var HandlebarsHelperServiceInterface
+   */
+  private $helperService;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\handlebars_theme_handler\FilesUtility $filesUtility
@@ -46,9 +44,9 @@ class Renderer {
    *
    * @throws \InvalidArgumentException If no template directories got defined.
    */
-  public function __construct(FilesUtility $filesUtility) {
+  public function __construct(FilesUtility $filesUtility, HandlebarsHelperServiceInterface $helperService) {
     $this->filesUtility = $filesUtility;
-    $this->fileLocator = new FileLocator(DRUPAL_ROOT);
+    $this->helperService = $helperService;
 
     $defaultTheme = \Drupal::config('system.theme')->get('default');
     $templatePath = drupal_get_path('theme', $defaultTheme) . '/templates/';
@@ -98,12 +96,18 @@ class Renderer {
         return "[partial (file:$name.tmpl) not found]";
       }
     ]);
-    $render = LightnCandy::prepare($php);
+    // Save the compiled PHP code into a php file
+    file_put_contents('render.php', '<?php ' . $php . '?>');
 
-    $results = $render($data, ['debug' => Runtime::DEBUG_ERROR_LOG]);
+    // Get the render function from the php file
+    $renderer = include('render.php');
+
+    $results = $renderer($data, ['debug' => Runtime::DEBUG_ERROR_LOG]);
 
     return $results;
   }
+
+
 
   /**
    * Adds the given helper to the rendering service
