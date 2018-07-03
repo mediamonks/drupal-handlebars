@@ -24,8 +24,7 @@ class FieldList extends ThemeFieldProcessorBase {
    * {@inheritdoc}
    */
   protected function getItemData(FieldItemInterface $field, $options = []) {
-    $allowed_values = $field->getDataDefinition()->getSetting('allowed_values');
-    return $allowed_values[$field->value];
+    return $field->value;
   }
 
 }
