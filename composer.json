@@ -7,6 +7,6 @@
   "homepage": "https://www.drupal.org/project/handlebars_theme_handler",
   "minimum-stability": "dev",
   "require": {
-    "xamin/handlebars.php": "^0.10.4"
+    "euphoricMV/handlebars.php": "^0.10.6"
   }
 }
