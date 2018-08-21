@@ -24,11 +24,12 @@ class FieldLink extends ThemeFieldProcessorBase {
   /**
    * {@inheritdoc}
    */
-  protected function getItemData(FieldItemInterface $field, $options = array()) {
+  protected function getItemData(FieldItemInterface $field, $options = []) {
     $url = $this->buildUrl($field)->toString();
     $data = [
       'text' => $field->title,
-      'url' => $url
+      'url' => $url,
+      'target' => '_self',
     ];
     return $data;
   }

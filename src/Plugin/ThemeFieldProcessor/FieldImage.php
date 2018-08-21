@@ -4,6 +4,7 @@ namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager;
 use Drupal\Core\Field\FieldItemInterface;
@@ -37,10 +38,8 @@ class FieldImage extends ThemeFieldProcessorBase {
    * @param \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor);
-
-    $this->entityProcessor = $entity_processor;
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, ModuleHandlerInterface $moduleHandler, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor, $moduleHandler);
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -53,6 +52,7 @@ class FieldImage extends ThemeFieldProcessorBase {
       $plugin_id,
       $plugin_definition,
       $container->get('plugin.manager.handlebars_theme_handler_entity_processor'),
+      $container->get('module_handler'),
       $container->get('entity_type.manager')
     );
   }

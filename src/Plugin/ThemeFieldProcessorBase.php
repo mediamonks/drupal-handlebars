@@ -8,6 +8,7 @@
 
 namespace Drupal\handlebars_theme_handler\Plugin;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
@@ -26,12 +27,19 @@ abstract class ThemeFieldProcessorBase extends PluginBase implements ThemeFieldP
   protected $themeEntityProcessorManager;
 
   /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $themeEntityProcessorManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $themeEntityProcessorManager, ModuleHandlerInterface $moduleHandler) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->themeEntityProcessorManager = $themeEntityProcessorManager;
+    $this->moduleHandler = $moduleHandler;
+
   }
 
   /**
@@ -42,7 +50,8 @@ abstract class ThemeFieldProcessorBase extends PluginBase implements ThemeFieldP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.handlebars_theme_handler_entity_processor')
+      $container->get('plugin.manager.handlebars_theme_handler_entity_processor'),
+      $container->get('module_handler')
     );
   }
 
@@ -75,7 +84,9 @@ abstract class ThemeFieldProcessorBase extends PluginBase implements ThemeFieldP
 
     foreach ($fields as $field) {
       if (!$field->isEmpty()) {
-        $data[] = $this->getItemData($field, $options);
+        $itemData = $this->getItemData($field, $options);
+        $this->moduleHandler->alter('field_preprocess_data', $itemData, $field, $options);
+        $data[] = $itemData;
       }
     }
 
