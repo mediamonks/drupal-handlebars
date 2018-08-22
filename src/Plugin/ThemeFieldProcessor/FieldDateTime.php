@@ -3,6 +3,7 @@
 namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessorBase;
 use Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager;
 use Drupal\Core\Field\FieldItemInterface;
@@ -35,8 +36,8 @@ class FieldDateTime extends ThemeFieldProcessorBase {
    * @param \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, DateFormatterInterface $date_formatter) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, ModuleHandlerInterface $moduleHandler, DateFormatterInterface $date_formatter) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor, $moduleHandler);
     $this->dateFormatter = $date_formatter;
   }
 
@@ -49,6 +50,7 @@ class FieldDateTime extends ThemeFieldProcessorBase {
       $plugin_id,
       $plugin_definition,
       $container->get('plugin.manager.handlebars_theme_handler_entity_processor'),
+      $container->get('module_handler'),
       $container->get('date.formatter')
     );
   }
