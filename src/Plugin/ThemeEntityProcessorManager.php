@@ -60,7 +60,7 @@ class ThemeEntityProcessorManager extends DefaultPluginManager {
       ->view($entity, $view_mode);
     $preparedData = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId())->build($data);
 
-    $preparedData['elements'] = $preparedData;
+    $preparedData['elements'] = $preparedData + $options;
 
     if (isset($options['style'])) {
       $preparedData['style'] = $options['style'];
