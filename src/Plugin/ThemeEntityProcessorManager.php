@@ -65,6 +65,10 @@ class ThemeEntityProcessorManager extends DefaultPluginManager {
     if (isset($options['style'])) {
       $preparedData['style'] = $options['style'];
     }
+    
+    if (isset($options['small'])) {
+      $preparedData['small'] = $options['small'];
+    }
 
     // Get a plugin that matches entity type and bundle.
     $processor->preprocessItemData($preparedData);
