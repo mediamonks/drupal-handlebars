@@ -55,7 +55,7 @@ class ThemeEntityProcessorManager extends DefaultPluginManager {
     $processor = $this->createInstance($plugin_id);
 
     $view_mode = isset($options['view_mode']) ? $options['view_mode'] : 'default';
-    $langcode = !empty($options['langcode']) ? $options['langcode'] : NULL;
+    $langcode = isset($options['langcode']) ? $options['langcode'] : NULL;
 
     $data = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId())
       ->view($entity, $view_mode, $langcode);
