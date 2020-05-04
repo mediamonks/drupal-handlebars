@@ -7,9 +7,13 @@ services:
     parent: default_plugin_manager
   handlebars_theme_handler.files_utility:
     class: Drupal\handlebars_theme_handler\FilesUtility
+  handlebars_theme_handler.handlebars_php_storage:
+    class: Drupal\Component\PhpStorage\PhpStorageInterface
+    factory: ['Drupal\Core\PhpStorage\PhpStorageFactory', 'get']
+    arguments: ['handlebars']
   handlebars_theme_handler.render.render_handlebars_template:
     class: Drupal\handlebars_theme_handler\Templating\Renderer
-    arguments: ['@handlebars_theme_handler.files_utility']
+    arguments: ['@handlebars_theme_handler.files_utility', '@config.factory', '@extension.list.theme', '@handlebars_theme_handler.handlebars_php_storage']
   handlebars_theme_handler.twig.render_handlebars_template:
     class: Drupal\handlebars_theme_handler\Twig\RenderHandlebarsTemplate
     arguments: ['@handlebars_theme_handler.render.render_handlebars_template']

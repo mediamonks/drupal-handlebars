@@ -5,6 +5,7 @@
  * Contains handlebars_theme_handler.module.
  */
 
+use Drupal\Core\PhpStorage\PhpStorageFactory;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -86,4 +87,14 @@ function handlebars_theme_handler_preprocess_theme_entity(&$variables, $hook, $i
       $entity_processor_plugin->preprocessItemData($variables);
     }
   }
+}
+
+/**
+ * Implements hook_cache_flush().
+ *
+ * Clear compiled handlebars templates cache.
+ */
+function handlebars_theme_handler_cache_flush() {
+  $storage = PhpStorageFactory::get('handlebars');
+  $storage->deleteAll();
 }
