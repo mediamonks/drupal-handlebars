@@ -1,0 +1,48 @@
+name: Running tests
+on: [push, pull_request]
+env:
+  MODULE_NAME: handlebars_theme_handler
+  DRUPAL_REPO: https://git.drupalcode.org/project/drupal.git
+  DRUPAL_VERSION: 8.8.x
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: drupal
+        ports:
+          - 3306
+    steps:
+      - name: Donwload Drupal
+        run: |
+          git clone --branch ${{env.DRUPAL_VERSION}} ${{env.DRUPAL_REPO}} drupal --depth 1
+      - uses: actions/checkout@v2
+        with:
+          path: drupal/modules/${{env.MODULE_NAME}}
+      - name: Run composer
+        run: |
+          composer config --global discard-changes true
+          composer global require drush/drush:~8.1
+          echo "export PATH=$HOME/.composer/vendor/bin:$PATH" >> ~/.bash_profile
+          source ~/.bash_profile
+          cd drupal
+          sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
+          composer require drupal/handlebars_theme_handler
+          composer update
+      - name: Install Drupal
+        shell: bash -l {0}
+        run: |
+          cd drupal
+          drush --yes site-install standard --db-url="mysql://root@127.0.0.1:${{job.services.mysql.ports[3306]}}/drupal"
+          drush --yes en ${{env.MODULE_NAME}}
+      - name: Run PhpUnit tests
+        shell: bash -l {0}
+        run: |
+          cd drupal
+          drush runserver 127.0.0.1:8080 &
+          export SIMPLETEST_BASE_URL=http://localhost:8080
+          export SIMPLETEST_DB=mysql://root@127.0.0.1:${{job.services.mysql.ports[3306]}}/drupal
+          vendor/bin/phpunit -c core/phpunit.xml.dist modules/${{env.MODULE_NAME}}
