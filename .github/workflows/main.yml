@@ -27,10 +27,12 @@ jobs:
           composer global require drush/drush:~8.1
           sed -i '1i export PATH="$HOME/.composer/vendor/bin:$PATH"' $HOME/.bashrc
           source $HOME/.bashrc
+          drush --version
           cd drupal
           sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
           composer update
       - name: Install Drupal
+        shell: bash -l {0}
         run: |
           cd drupal
           drush --yes site-install standard --db-url="mysql://root@127.0.0.1/drupal"
