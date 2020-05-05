@@ -25,8 +25,8 @@ jobs:
       - name: Run composer
         run: |
           composer global require drush/drush:~8.1
-          sed -i '1i export PATH="$HOME/.composer/vendor/bin:$PATH"' $HOME/.bashrc
-          source $HOME/.bashrc
+          echo "export PATH=$HOME/.composer/vendor/bin:$PATH" >> ~/.bash_profile
+          source ~/.bash_profile
           drush --version
           cd drupal
           sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
