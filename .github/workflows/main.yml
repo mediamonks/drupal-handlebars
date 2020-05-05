@@ -11,10 +11,10 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-            MYSQL_DATABASE: drupal
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: drupal
         ports:
-            - 3306
+          - 3306
     steps:
       - name: Donwload Drupal
         run: git clone --branch ${{env.DRUPAL_VERSION}} ${{env.DRUPAL_REPO}} drupal --depth 1
@@ -23,6 +23,12 @@ jobs:
           path: drupal/modules
       - name: Run composer
         run: |
+          composer global require drush/drush:~8.1
           cd drupal
-          sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_hamdler\"}\,|" composer.json
-          composer update   
+          sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
+          composer update
+      - name: Install Drupal
+        run: |
+          cd drupal
+          drush --yes site-install standard --db-url="mysql://root@127.0.0.1/drupal"
+          drush --yes en ${{env.MODULE_NAME}}
