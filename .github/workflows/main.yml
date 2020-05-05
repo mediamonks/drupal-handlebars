@@ -7,6 +7,14 @@ env:
 jobs:
   phpunit:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+            MYSQL_ALLOW_EMPTY_PASSWORD: yes
+            MYSQL_DATABASE: drupal
+        ports:
+            - 3306
     steps:
       - name: Donwload Drupal
         run: git clone --branch ${{env.DRUPAL_VERSION}} ${{env.DRUPAL_REPO}} drupal --depth 1
@@ -16,5 +24,5 @@ jobs:
       - name: Run composer
         run: |
           cd drupal
-          sed -i "s|\"repositories\": [|\"repositories\": [ {\"type\": \"path\", \"url\": \"core\"},|" composer.json
-          composer update
+          sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_hamdler\"}\,|" composer.json
+          composer update   
