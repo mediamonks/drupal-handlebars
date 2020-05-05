@@ -17,7 +17,10 @@ jobs:
           - 3306
     steps:
       - name: Donwload Drupal
-        run: git clone --branch ${{env.DRUPAL_VERSION}} ${{env.DRUPAL_REPO}} drupal --depth 1
+        run: |
+          git clone --branch ${{env.DRUPAL_VERSION}} ${{env.DRUPAL_REPO}} drupal --depth 1
+          ls -lah
+          pwd
       - uses: actions/checkout@v2
         with:
           path: drupal/modules
@@ -25,6 +28,7 @@ jobs:
         run: |
           composer global require drush/drush:~8.1
           cd drupal
+          ls -lah
           sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
           composer update
       - name: Install Drupal
@@ -32,3 +36,5 @@ jobs:
           cd drupal
           drush --yes site-install standard --db-url="mysql://root@127.0.0.1/drupal"
           drush --yes en ${{env.MODULE_NAME}}
+      - name: Run PhpUnit tests
+        run: vendor/bin/phpunit -c core/phpunit.xml.dist modules/${{env.MODULE_NAME}}
