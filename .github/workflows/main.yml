@@ -25,7 +25,9 @@ jobs:
       - name: Run composer
         run: |
           composer global require drush/drush:~8.1
-          cd drupal
+          cd drupal/modules
+          ls -lah
+          cd ..
           sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/drupal-handlebars\"}\,|" composer.json
           composer update
       - name: Install Drupal
