@@ -27,7 +27,6 @@ jobs:
           composer global require drush/drush:~8.1
           echo "export PATH=$HOME/.composer/vendor/bin:$PATH" >> ~/.bash_profile
           source ~/.bash_profile
-          drush --version
           cd drupal
           sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
           composer update
@@ -35,7 +34,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd drupal
-          drush --yes site-install standard --db-url="mysql://root@127.0.0.1/drupal"
+          drush --yes site-install standard --db-url="mysql://root@127.0.0.1:${{job.services.mysql.ports[3306]}}/drupal"
           drush --yes en ${{env.MODULE_NAME}}
       - name: Run PhpUnit tests
         run: vendor/bin/phpunit -c core/phpunit.xml.dist modules/${{env.MODULE_NAME}}
