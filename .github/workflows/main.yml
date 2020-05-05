@@ -1,0 +1,15 @@
+name: Tests
+on: [push, pull_request]
+env:
+  MODULE_NAME: handlebars_theme_handler
+  DRUPAL_REPO: https://git.drupalcode.org/project/drupal.git
+  DRUPAL_VERSION: 8.8.x
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: drupal/modules
+      - name: Donwload Drupal
+        run: git clone --branch ${{env.DRUPAL_REPO}} ${{env.DRUPAL_VERSION}} drupal --depth 1
