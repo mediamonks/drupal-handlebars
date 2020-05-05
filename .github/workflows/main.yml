@@ -37,4 +37,8 @@ jobs:
           drush --yes site-install standard --db-url="mysql://root@127.0.0.1:${{job.services.mysql.ports[3306]}}/drupal"
           drush --yes en ${{env.MODULE_NAME}}
       - name: Run PhpUnit tests
-        run: vendor/bin/phpunit -c core/phpunit.xml.dist modules/${{env.MODULE_NAME}}
+        run: |
+          cd drupal
+          export SIMPLETEST_BASE_URL=http://localhost:8080
+          export SIMPLETEST_DB=mysql://root@127.0.0.1:${{job.services.mysql.ports[3306]}}/drupal
+          vendor/bin/phpunit -c core/phpunit.xml.dist modules/${{env.MODULE_NAME}}
