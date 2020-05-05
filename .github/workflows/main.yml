@@ -24,6 +24,7 @@ jobs:
           path: drupal/modules/${{env.MODULE_NAME}}
       - name: Run composer
         run: |
+          composer config --global discard-changes true
           composer global require drush/drush:~8.1
           echo "export PATH=$HOME/.composer/vendor/bin:$PATH" >> ~/.bash_profile
           source ~/.bash_profile
