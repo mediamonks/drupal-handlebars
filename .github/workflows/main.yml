@@ -29,6 +29,7 @@ jobs:
           source ~/.bash_profile
           cd drupal
           sed -i "s|\"repositories\": \[|\"repositories\": \[ {\"type\": \"path\", \"url\": \"modules/handlebars_theme_handler\"}\,|" composer.json
+          composer require drupal/handlebars_theme_handler
           composer update
       - name: Install Drupal
         shell: bash -l {0}
