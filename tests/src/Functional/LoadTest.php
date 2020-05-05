@@ -11,6 +11,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group handlebars_theme_handler
  */
 class LoadTest extends BrowserTestBase {
+  
+  protected $defaultTheme = 'stable';
 
   /**
    * Modules to enable.
