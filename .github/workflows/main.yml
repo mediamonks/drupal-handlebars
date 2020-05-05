@@ -39,6 +39,7 @@ jobs:
           drush --yes site-install standard --db-url="mysql://root@127.0.0.1:${{job.services.mysql.ports[3306]}}/drupal"
           drush --yes en ${{env.MODULE_NAME}}
       - name: Run PhpUnit tests
+        shell: bash -l {0}
         run: |
           cd drupal
           drush runserver 127.0.0.1:8080 &
