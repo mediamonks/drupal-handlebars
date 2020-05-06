@@ -8,6 +8,7 @@
   "minimum-stability": "dev",
   "require": {
     "xamin/handlebars.php": "^0.10.4",
-    "symfony/config": "3.*"
+    "symfony/config": "3.*",
+    "symfony/finder": "3.*"
   }
 }
