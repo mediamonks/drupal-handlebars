@@ -6,13 +6,15 @@ use Drupal\handlebars_theme_handler\FilesUtility;
 use Handlebars\Handlebars;
 use Handlebars\Loader\FilesystemLoader;
 use Drupal\handlebars_theme_handler\Templating\Renderer;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
 /**
  * Class RenderHandlebarsTemplate.
  *
  * @package Drupal\handlebars_theme_handler
  */
-class RenderHandlebarsTemplate extends \Twig_Extension {
+class RenderHandlebarsTemplate extends AbstractExtension {
 
   /**
    * @var \Drupal\handlebars_theme_handler\Templating\Renderer
@@ -42,7 +44,7 @@ class RenderHandlebarsTemplate extends \Twig_Extension {
    */
   public function getFunctions() {
     return [
-      new \Twig_SimpleFunction('handlebars',
+      new TwigFunction('handlebars',
         [$this, 'renderHandlebars'],
         [
           'is_safe' => ['html'],
