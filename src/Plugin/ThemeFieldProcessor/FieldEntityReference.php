@@ -24,11 +24,15 @@ class FieldEntityReference extends ThemeFieldProcessorBase {
    * {@inheritdoc}
    */
   protected function getItemData(FieldItemInterface $field, $options = []) {
-
+    $data = [];
+    
     /** @var ContentEntityInterface $entity */
     $entity = $field->get('entity')->getValue();
-    $data = $this->themeEntityProcessorManager->getEntityData($entity, $options);
+    
+    if ($entity && $entity instanceof ContentEntityInterface) {
+      $data = $this->themeEntityProcessorManager->getEntityData($entity, $options);
+    }
+    
     return $data;
-
   }
 }
