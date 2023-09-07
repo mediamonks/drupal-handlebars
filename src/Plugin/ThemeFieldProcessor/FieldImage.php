@@ -4,6 +4,7 @@ namespace Drupal\handlebars_theme_handler\Plugin\ThemeFieldProcessor;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager;
 use Drupal\Core\Field\FieldItemInterface;
@@ -31,13 +32,19 @@ class FieldImage extends ThemeFieldProcessorBase {
   protected $entityTypeManager;
 
   /**
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * @param array $configuration
    * @param string $plugin_id
    * @param mixed $plugin_definition
    * @param \Drupal\handlebars_theme_handler\Plugin\ThemeEntityProcessorManager $entity_processor
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThemeEntityProcessorManager $entity_processor, EntityTypeManagerInterface $entity_type_manager, FileUrlGeneratorInterface $file_url_generator) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_processor);
 
     $this->entityProcessor = $entity_processor;
@@ -53,7 +60,8 @@ class FieldImage extends ThemeFieldProcessorBase {
       $plugin_id,
       $plugin_definition,
       $container->get('plugin.manager.handlebars_theme_handler_entity_processor'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -66,7 +74,7 @@ class FieldImage extends ThemeFieldProcessorBase {
       $url = $this->getStyledImageUrl($field, $options['style']);
     }
     else {
-      $url = file_create_url($field->entity->uri->value);
+      $url = $this->fileUrlGenerator->generateAbsoluteString($field->entity->uri->value);
     }
 
     $data = [
@@ -97,7 +105,7 @@ class FieldImage extends ThemeFieldProcessorBase {
       $url = $style->buildUrl($original_url);
     }
     else {
-      $url = file_create_url($original_url);
+      $url = $this->fileUrlGenerator->generateAbsoluteString($field->entity->uri->value);
     }
 
     return $url;

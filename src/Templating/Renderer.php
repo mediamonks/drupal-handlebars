@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Templating;
 
+use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\handlebars_theme_handler\FilesUtility;
 use Handlebars\Cache;
 use Handlebars\Handlebars;
@@ -44,7 +45,7 @@ class Renderer {
     $this->fileLocator = new FileLocator(DRUPAL_ROOT);
 
     $defaultTheme = \Drupal::config('system.theme')->get('default');
-    $templatePath = drupal_get_path('theme', $defaultTheme) . '/templates/';
+    $templatePath = \Drupal::service('extension.list.theme')>getPath($defaultTheme) . '/templates/';
     $templateDirectories = [$templatePath];
 
     $templateDirectories = $this->filesUtility->getTemplateDirectoriesRecursive($templateDirectories);

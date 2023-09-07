@@ -2,6 +2,7 @@
 
 namespace Drupal\handlebars_theme_handler\Command;
 
+use Drupal\Core\Extension\ExtensionPathResolver;
 use Drupal\handlebars_theme_handler\FilesUtility;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Symfony\Component\Config\FileLocator;
@@ -41,17 +42,25 @@ class GenerateParagraphsCommand extends Command {
   private $filesUtility;
 
   /**
+   * @var \Drupal\Core\Extension\ExtensionPathResolver
+   */
+  private $extensionPathResolver;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\handlebars_theme_handler\FilesUtility $filesUtility
    *   Handlebars rendering engine
+   * @param \Drupal\Core\Extension\ExtensionPathResolver $extensionPathResolver
+   *   Extension path resolver.
    *
    * @throws \InvalidArgumentException If no template directories got defined.
    */
-  public function __construct(FilesUtility $filesUtility) {
+  public function __construct(FilesUtility $filesUtility, ExtensionPathResolver $extensionPathResolver) {
     $this->fileLocator = new FileLocator(DRUPAL_ROOT);
     $this->filesystem = new Filesystem();
     $this->filesUtility = $filesUtility;
+    $this->extensionPathResolver = $extensionPathResolver;
     parent::__construct();
   }
 
@@ -80,7 +89,7 @@ class GenerateParagraphsCommand extends Command {
     $module = $input->getArgument('module');
 
     // Get all components directories.
-    $templatePath = drupal_get_path('theme', $defaultTheme) . '/templates/block';
+    $templatePath = $this->extensionPathResolver->getPath('theme', $defaultTheme) . '/templates/block';
     $templatePath = \Drupal::service('file_system')
       ->realpath($templatePath);
     if (!$templatePath) {
@@ -91,7 +100,7 @@ class GenerateParagraphsCommand extends Command {
     $templateDirectories = $this->filesUtility->getTemplateDirectoriesRecursive($templateDirectories);
 
     $classTemplate = __DIR__ . '/../ThemeEntityProcessorTemplate/ParagraphBlockTemplate.php';
-    $moduleComponentsPath = drupal_get_path('module', $module) . '/src/Plugin/ThemeEntityProcessor/ParagraphsBlock';
+    $moduleComponentsPath = $this->extensionPathResolver->getPath('module', $module) . '/src/Plugin/ThemeEntityProcessor/ParagraphsBlock';
     $moduleComponentsPath = realpath($moduleComponentsPath);
 
     // Create component classes.
