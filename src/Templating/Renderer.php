@@ -45,7 +45,7 @@ class Renderer {
     $this->fileLocator = new FileLocator(DRUPAL_ROOT);
 
     $defaultTheme = \Drupal::config('system.theme')->get('default');
-    $templatePath = \Drupal::service('extension.list.theme')>getPath($defaultTheme) . '/templates/';
+    $templatePath = \Drupal::service('extension.list.theme')->getPath($defaultTheme) . '/templates/';
     $templateDirectories = [$templatePath];
 
     $templateDirectories = $this->filesUtility->getTemplateDirectoriesRecursive($templateDirectories);
