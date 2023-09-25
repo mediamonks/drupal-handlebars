@@ -49,6 +49,7 @@ class FieldImage extends ThemeFieldProcessorBase {
 
     $this->entityProcessor = $entity_processor;
     $this->entityTypeManager = $entity_type_manager;
+    $this->fileUrlGenerator = $file_url_generator;
   }
 
   /**
